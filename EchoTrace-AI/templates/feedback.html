@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoTrace AI - Employee Feedback</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            color: #26332d;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #176b45;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #68756e;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px #0000000d;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 18px 0 9px;
+        }
+
+        select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccd8d0;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 25px;
+            margin: 12px 0;
+        }
+
+        .radio-group label {
+            margin: 0;
+            font-weight: normal;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 13px 25px;
+            border: none;
+            border-radius: 7px;
+            background: #16834f;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .feedback-item {
+            padding: 15px;
+            border-bottom: 1px solid #e5ebe7;
+            line-height: 1.6;
+        }
+
+        .feedback-item:last-child {
+            border-bottom: none;
+        }
+
+        .confirmed {
+            color: #16834f;
+            font-weight: bold;
+        }
+
+        .rejected {
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        a {
+            color: #16834f;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>EchoTrace AI</h1>
+    <h2>Employee Feedback</h2>
+
+    <p class="subtitle">
+        Confirm whether the detected problem is real and share its actual outcome.
+    </p>
+
+    <div class="card">
+
+        <form id="feedbackForm">
+
+            <label for="incident">Select Incident</label>
+
+            <select id="incident" required>
+                <option value="">Loading incidents...</option>
+            </select>
+
+            <label>Was the identified problem correct?</label>
+
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="decision"
+                           value="confirmed" required>
+                    Confirmed
+                </label>
+
+                <label>
+                    <input type="radio" name="decision"
+                           value="rejected">
+                    Rejected
+                </label>
+            </div>
+
+            <label for="outcome">Actual Outcome / Feedback</label>
+
+            <textarea id="outcome"
+                      placeholder="Describe the actual outcome..."
+                      required></textarea>
+
+            <button type="submit" id="submitButton">
+                Submit Feedback
+            </button>
+
+            <p id="message"></p>
+
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Previous Feedback</h2>
+        <div id="feedbackHistory">Loading feedback...</div>
+    </div>
+
+    <p><a href="/">← Back to Dashboard</a></p>
+
+</div>
+
+<script>
+    async function loadData() {
+
+        const incidentSelect = document.getElementById("incident");
+        const history = document.getElementById("feedbackHistory");
+
+        try {
+            const [incidentResponse, feedbackResponse] =
+                await Promise.all([
+                    fetch("/api/feedback/incidents"),
+                    fetch("/api/feedback")
+                ]);
+
+            if (!incidentResponse.ok || !feedbackResponse.ok) {
+                throw new Error("Unable to load feedback data.");
+            }
+
+            const incidents = await incidentResponse.json();
+            const feedback = await feedbackResponse.json();
+
+            incidentSelect.innerHTML =
+                '<option value="">Choose an incident</option>';
+
+            incidents.forEach(item => {
+                const option = document.createElement("option");
+
+                option.value = item.id;
+                option.textContent =
+                    `Incident #${item.id} - ${item.department}`;
+
+                incidentSelect.appendChild(option);
+            });
+
+            history.innerHTML = "";
+
+            if (!feedback.length) {
+                history.textContent = "No feedback submitted yet.";
+                return;
+            }
+
+            feedback.forEach(item => {
+
+                const entry = document.createElement("div");
+                entry.className = "feedback-item";
+
+                const heading = document.createElement("strong");
+                heading.textContent =
+                    `Incident #${item.incident_id} | `;
+
+                const decision = document.createElement("span");
+                const decisionText =
+                    String(item.decision || "").toLowerCase();
+
+                decision.textContent =
+                    decisionText.charAt(0).toUpperCase() +
+                    decisionText.slice(1);
+
+                decision.className =
+                    decisionText === "confirmed"
+                        ? "confirmed"
+                        : "rejected";
+
+                const outcome = document.createElement("p");
+                outcome.textContent = item.outcome || "";
+
+                entry.appendChild(heading);
+                entry.appendChild(decision);
+                entry.appendChild(outcome);
+
+                history.appendChild(entry);
+            });
+
+        } catch (error) {
+            incidentSelect.innerHTML =
+                '<option value="">Unable to load incidents</option>';
+
+            history.textContent = error.message;
+        }
+    }
+
+    document.getElementById("feedbackForm")
+        .addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const button = document.getElementById("submitButton");
+        const message = document.getElementById("message");
+
+        const incident_id =
+            document.getElementById("incident").value;
+
+        const decision =
+            document.querySelector(
+                'input[name="decision"]:checked'
+            )?.value;
+
+        const outcome =
+            document.getElementById("outcome").value.trim();
+
+        if (!incident_id || !decision || !outcome) {
+            message.textContent = "Please complete all fields.";
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Submitting...";
+        message.textContent = "";
+
+        try {
+            const response = await fetch("/api/feedback", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    incident_id,
+                    decision,
+                    outcome
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    result.error || result.message ||
+                    "Feedback submission failed."
+                );
+            }
+
+            message.textContent =
+                result.message || "Feedback submitted successfully!";
+
+            document.getElementById("feedbackForm").reset();
+
+            await loadData();
+
+        } catch (error) {
+            message.textContent = error.message;
+
+        } finally {
+            button.disabled = false;
+            button.textContent = "Submit Feedback";
+        }
+    });
+
+    loadData();
+</script>
+
+</body>
+</html>

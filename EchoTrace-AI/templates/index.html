@@ -1,0 +1,519 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoTrace AI | Operational Intelligence</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1e293b;
+            padding: 25px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        header {
+            background: #102a43;
+            color: white;
+            padding: 28px;
+            border-radius: 15px;
+            margin-bottom: 22px;
+        }
+
+        header h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #d9e8f5;
+            margin-bottom: 14px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #176b55;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .stat, .panel {
+            background: white;
+            padding: 23px;
+            border-radius: 13px;
+            box-shadow: 0 3px 12px #0000000b;
+        }
+
+        .stat h2 {
+            color: #147d64;
+            font-size: 30px;
+            margin-top: 10px;
+        }
+
+        .panel {
+            margin-bottom: 22px;
+        }
+
+        .panel h2 {
+            margin-bottom: 10px;
+            color: #102a43;
+        }
+
+        .subtext {
+            color: #64748b;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 16px 0 8px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        button {
+            background: #087f5b;
+            color: white;
+            border: none;
+            padding: 13px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 17px;
+        }
+
+        button:hover {
+            background: #066649;
+        }
+
+        .analyze-btn {
+            background: #174ea6;
+        }
+
+        .analyze-btn:hover {
+            background: #123c80;
+        }
+
+        .feedback-link {
+            display: inline-block;
+            margin-top: 16px;
+            color: #174ea6;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .message {
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        .analysis {
+            background: #f8fafc;
+            border: 1px solid #dbe4ee;
+            padding: 20px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+            font-family: Arial, sans-serif;
+        }
+
+        .memory-box {
+            background: #edf7f3;
+            border: 1px solid #b7dfcf;
+            border-radius: 10px;
+            padding: 18px;
+            margin-top: 18px;
+        }
+
+        .memory-box h3 {
+            color: #087f5b;
+            margin-bottom: 10px;
+        }
+
+        .memory-item {
+            background: white;
+            padding: 13px;
+            border-radius: 8px;
+            margin-top: 10px;
+            line-height: 1.5;
+            border-left: 4px solid #087f5b;
+        }
+
+        .incident {
+            border: 1px solid #e2e8f0;
+            border-radius: 9px;
+            padding: 16px;
+            margin-top: 13px;
+            background: white;
+            line-height: 1.7;
+        }
+
+        .incident strong {
+            color: #174ea6;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 15px;
+            background: #e2e8f0;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            padding: 20px;
+        }
+
+        @media(max-width: 600px) {
+            body { padding: 12px; }
+            .stats { grid-template-columns: 1fr; }
+            header h1 { font-size: 24px; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <header>
+        <h1>🧠 EchoTrace AI</h1>
+        <p>Discover the Problems Hidden in Every Experience</p>
+        <span class="tag">● Hindsight Memory</span>
+        <p style="margin-top:18px;">
+            Operational Intelligence Dashboard
+        </p>
+        Capture employee experiences. Discover hidden problems.
+        Learn from every incident.
+    </header>
+
+    <section class="stats">
+        <div class="stat">
+            <p>Total Incidents</p>
+            <h2 id="totalIncidents">0</h2>
+        </div>
+        <div class="stat">
+            <p>Departments</p>
+            <h2 id="totalDepartments">0</h2>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>📝 Report an Experience</h2>
+        <p class="subtext">
+            Record an operational problem and the workaround used by an employee.
+        </p>
+
+        <form id="incidentForm">
+            <label>Employee ID</label>
+            <input type="text" id="employeeId" placeholder="Example: E001" required>
+
+            <label>Department</label>
+            <select id="department" required>
+                <option value="">Select department</option>
+                <option>Sales</option>
+                <option>Finance</option>
+                <option>Human Resources</option>
+                <option>Operations</option>
+                <option>IT</option>
+                <option>Customer Support</option>
+            </select>
+
+            <label>What problem did you experience?</label>
+            <textarea id="problem" placeholder="Describe the problem..." required></textarea>
+
+            <label>How did you work around it?</label>
+            <textarea id="workaround" placeholder="Describe your workaround..." required></textarea>
+
+            <button type="submit">Save Experience to Memory</button>
+        </form>
+
+        <div id="formMessage" class="message"></div>
+
+        <a href="/feedback" class="feedback-link">
+            📝 Give Employee Feedback
+        </a>
+    </section>
+
+    <section class="panel">
+        <h2>🔍 Discover Hidden Problems</h2>
+        <p class="subtext">
+            Let EchoTrace AI recall previous experiences and identify recurring
+            operational patterns.
+        </p>
+
+        <button class="analyze-btn" id="analyzeButton" onclick="analyzeMemories()">
+            Analyze All Memories
+        </button>
+
+        <div id="analysisSection" style="display:none; margin-top:25px;">
+            <h2>AI Analysis</h2>
+            <div id="analysisText" class="analysis"></div>
+
+            <div class="memory-box">
+                <h3>🧠 Hindsight Memory Insights</h3>
+                <p id="memoryStatus">Waiting for analysis...</p>
+                <p style="margin-top:8px;">
+                    Related memories recalled:
+                    <strong id="memoryCount">0</strong>
+                </p>
+                <div id="memoryList"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>📚 Previous Employee Experiences</h2>
+        <div id="incidentList">
+            Loading experiences...
+        </div>
+    </section>
+
+    <footer>
+        EchoTrace AI | Powered by Hindsight Memory | Hackathon Prototype
+    </footer>
+
+</div>
+
+<script>
+    async function loadStats() {
+        try {
+            const response = await fetch("/api/stats");
+            const data = await response.json();
+
+            document.getElementById("totalIncidents").textContent =
+                data.total_incidents ?? 0;
+
+            document.getElementById("totalDepartments").textContent =
+                data.total_departments ?? 0;
+        } catch (error) {
+            console.error("Stats error:", error);
+        }
+    }
+
+    async function loadIncidents() {
+        const list = document.getElementById("incidentList");
+
+        try {
+            const response = await fetch("/api/incidents");
+            const data = await response.json();
+
+            const incidents = Array.isArray(data) ? data :
+                (data.incidents || []);
+
+            // Hide exact duplicate experiences in the display.
+            const unique = [];
+            const seen = new Set();
+
+            incidents.forEach(item => {
+                const key = [
+                    item.employee_id,
+                    item.department,
+                    item.problem,
+                    item.workaround
+                ].map(value => String(value || "").trim().toLowerCase()).join("|");
+
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    unique.push(item);
+                }
+            });
+
+            if (unique.length === 0) {
+                list.textContent = "No employee experiences recorded yet.";
+                return;
+            }
+
+            list.innerHTML = "";
+
+            unique.forEach((item, index) => {
+                const card = document.createElement("div");
+                card.className = "incident";
+
+                const heading = document.createElement("strong");
+                heading.textContent =
+                    `#${item.id ?? index + 1} | ${item.employee_id} | ${item.department}`;
+
+                const problem = document.createElement("p");
+                problem.textContent = "Problem: " + item.problem;
+
+                const workaround = document.createElement("p");
+                workaround.textContent = "Workaround: " + item.workaround;
+
+                card.append(heading, problem, workaround);
+                list.appendChild(card);
+            });
+
+        } catch (error) {
+            list.textContent = "Unable to load employee experiences.";
+            console.error(error);
+        }
+    }
+
+    document.getElementById("incidentForm").addEventListener("submit",
+        async function(event) {
+            event.preventDefault();
+
+            const message = document.getElementById("formMessage");
+            message.textContent = "Saving experience...";
+
+            const payload = {
+                employee_id: document.getElementById("employeeId").value.trim(),
+                department: document.getElementById("department").value,
+                problem: document.getElementById("problem").value.trim(),
+                workaround: document.getElementById("workaround").value.trim()
+            };
+
+            try {
+                const response = await fetch("/api/incidents", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || "Unable to save experience.");
+                }
+
+                message.textContent = result.message || "Experience saved successfully!";
+                message.style.color = "green";
+
+                this.reset();
+                await loadIncidents();
+                await loadStats();
+
+            } catch (error) {
+                message.textContent = error.message;
+                message.style.color = "red";
+            }
+        }
+    );
+
+    async function analyzeMemories() {
+        const button = document.getElementById("analyzeButton");
+        const section = document.getElementById("analysisSection");
+        const analysisText = document.getElementById("analysisText");
+        const memoryStatus = document.getElementById("memoryStatus");
+        const memoryCount = document.getElementById("memoryCount");
+        const memoryList = document.getElementById("memoryList");
+
+        button.disabled = true;
+        button.textContent = "Analyzing memories...";
+        section.style.display = "block";
+        analysisText.textContent = "Analyzing employee experiences...";
+        memoryStatus.textContent = "Connecting to Hindsight...";
+        memoryCount.textContent = "0";
+        memoryList.innerHTML = "";
+
+        try {
+            const response = await fetch("/api/analyze", {
+                method: "POST"
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Analysis failed.");
+            }
+
+            analysisText.textContent =
+                typeof data.analysis === "string"
+                    ? data.analysis
+                    : JSON.stringify(data.analysis, null, 2);
+
+            const raw = data.memory_result ?? data.memory ?? null;
+
+            if (data.memory_available || raw) {
+                memoryStatus.textContent =
+                    "Hindsight successfully recalled previous memories.";
+
+                const results = raw?.results ??
+                    raw?.memories ??
+                    (Array.isArray(raw) ? raw : []);
+
+                memoryCount.textContent =
+                    results.length || data.related_memories_count || "Available";
+
+                results.forEach((item, index) => {
+                    const card = document.createElement("div");
+                    card.className = "memory-item";
+
+                    const heading = document.createElement("strong");
+                    heading.textContent =
+                        `Memory ${index + 1} · ${item.type || "Experience"}`;
+
+                    const content = document.createElement("p");
+                    content.textContent =
+                        item.text || item.content || JSON.stringify(item);
+
+                    card.append(heading, content);
+                    memoryList.appendChild(card);
+                });
+
+                if (!results.length) {
+                    memoryList.textContent =
+                        "Memory retrieval succeeded. Detailed memory records are not available in this response.";
+                }
+
+            } else {
+                memoryStatus.textContent =
+                    "Hindsight memories were unavailable for this analysis.";
+                memoryCount.textContent = "0";
+            }
+
+        } catch (error) {
+            analysisText.textContent = error.message;
+            memoryStatus.textContent = "Unable to retrieve memory insights.";
+        } finally {
+            button.disabled = false;
+            button.textContent = "Analyze All Memories";
+        }
+    }
+
+    loadStats();
+    loadIncidents();
+</script>
+
+</body>
+</html>
